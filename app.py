@@ -9,9 +9,10 @@ app = Flask(__name__)
 def getAllTasks():
     return task_db
 
-@app.get('/tasks/<uuid:id>')
+@app.get('/tasks/<string:id>')
 def getTasks(id):
-    return "Get app id: " + str(id)
+    print(id)
+    return task_db[id]
 
 @app.post('/tasks')
 def createTask():
@@ -19,19 +20,22 @@ def createTask():
     print(data)
     newId = str(uuid.uuid4())
     task_db[newId] = {
-        "task_id" : newId, 
-        "name": data['name'],
-        "description": data['description'],
-        "status": data['status'],
-        "created_at" : date.today(),
-        "updated_at" : date.today()
+        newId : {
+            "task_id" : newId, 
+            "name": data['name'],
+            "description": data['description'],
+            "status": data['status'],
+            "created_at" : date.today(),
+            "updated_at" : date.today()
+            }
+        
     }
     return task_db[newId] 
 
 @app.delete('/tasks/<string:id>')
 def deleteTask(id):
     task_db.pop(id)
-    return "task deleted "+ id
+    return "task deleted "+ str(id)
 
 @app.put('/tasks/<string:id>')
 def updateTask(id):
@@ -45,6 +49,6 @@ def updateTask(id):
     }
     return task_db[id]
 
-@app.patch('/tasks/<uuid:id>')
+@app.patch('/tasks/<string:id>')
 def patchTask(id):
     return "task to be patched " + str(id)

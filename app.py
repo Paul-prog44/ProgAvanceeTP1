@@ -69,4 +69,21 @@ def updateTask(id):
 def patchTask(id):
     data = request.json
     print(data)
-    return "task to be patched " + str(id)
+    if id in task_db :
+        current_task =  task_db[id]
+        
+        if 'name' in data:
+            current_task['name'] = data['name']
+        if 'description' in data:
+            current_task['description'] = data['description']
+        if 'status' in data:
+            current_task['description'] = data['description']
+
+        current_task["updated_at"] = datetime.today()
+    
+        return current_task, 201
+
+    else: 
+        print("key not found")
+        return "Cette tâche n'existe pas", 404 
+    

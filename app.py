@@ -1,5 +1,5 @@
 from flask import Flask, request
-from datetime import date
+from datetime import datetime
 from db import task_db
 import uuid
 
@@ -22,19 +22,18 @@ def getTasks(id):
 @app.post('/tasks')
 def createTask():
     data = request.json
-    if not data['name'] or not data['description'] or not data['status'] :
-        return 'missing a value', 400
+    if not data['name'] or not data['description'] or not data['status'] or len(data) > 3  :
+        return 'Erreur dans le corps de la requête', 400
     else :
+        
         newId = str(uuid.uuid4())
         task_db[newId] = {
-            newId : {
                 "task_id" : newId, 
                 "name": data['name'],
                 "description": data['description'],
                 "status": data['status'], #« TODO », « IN_PROGRESS », « DONE ». Ces valeurs seront transmises par le front
-                "created_at" : date.today(),
-                "updated_at" : date.today()
-                }  
+                "created_at" : datetime.today(),
+                "updated_at" : datetime.today()
         }
 
     return task_db[newId] 
@@ -42,19 +41,25 @@ def createTask():
 @app.delete('/tasks/<string:id>')
 def deleteTask(id):
     task_db.pop(id)
-    return "task deleted "+ str(id)
+    return "task deleted "+ str(id), 200
 
 @app.put('/tasks/<string:id>')
 def updateTask(id):
-    data = request.json
-    task_db[id] = {
-        "task_id" : id, 
-        "name": data['name'],
-        "description": data['description'],
-        "status": data['status'],
-        "updated_at" : date.today()
-    }
-    return task_db[id]
+    if id in task_db :
+        data = request.json
+        task_db[id] = {
+            "task_id" : id, 
+            "name": data['name'],
+            "description": data['description'],
+            "status": data['status'],
+            "created_at" : task_db[id]['created_at'],
+            "updated_at" : datetime.today()
+        }
+        return task_db[id]
+    else: 
+        print("key not found")
+        return "Cette tâche n'existe pas", 404 
+    
 
 @app.patch('/tasks/<string:id>')
 def patchTask(id):
